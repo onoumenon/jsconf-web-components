@@ -3,8 +3,15 @@
   template.innerHTML = `
     <style>
       // add basic style on host element
+      :host {
+        display: block;
+        font-size: 24px;
+        position: relative;
+        border-bottom: 1px solid #ededed;
+      }
 
       // make the text-decoration value to line-through when item is completed
+
 
       // show the 'x' button on hover to host element
 
@@ -126,15 +133,16 @@
   `;
 
   class TodoItem extends HTMLElement {
-
     // observe label and completed attibutes
     static get observedAttributes() {
-
+      return ["label", "completed"];
     }
 
     constructor() {
       super();
       // append template to the shadow root
+      this.attachShadow({ mode: "open" });
+      this.shadowRoot.appendChild(template.content.cloneNode(true));
 
       this._onCheckboxClick = this._onCheckboxClick.bind(this);
       this._onRemoveButtonClick = this._onRemoveButtonClick.bind(this);
@@ -167,9 +175,41 @@
 
     attributeChangedCallback(name, oldValue, newValue) {
       // Implement changed callback for label and completed attribute
+      switch (name) {
+        case "label":
+          this._label.textContent = newValue || "";
+          break;
+        case "completed":
+          this._checkbox.checked = this.completed;
+          break;
+      }
     }
 
     // Add completed and label properties and reflect its values to their attribute counter parts
+
+    get completed() {
+      return this.hasAttribute("completed");
+    }
+
+    set completed(isCompleted) {
+      if (isCompleted) {
+        this.setAttribute("completed", "");
+      } else {
+        this.removeAttribute("completed");
+      }
+    }
+
+    get label() {
+      return this.getAttribute("label");
+    }
+
+    set label(value) {
+      if (value) {
+        this.setAttribute("label", value);
+      } else {
+        this.removeAttribute("label");
+      }
+    }
 
     _onCheckboxClick(event) {
       this.completed = event.target.checked;
@@ -194,4 +234,5 @@
   }
 
   // Define the new custom element as todo-item
+  customElements.define("todo-item", TodoItem);
 })();

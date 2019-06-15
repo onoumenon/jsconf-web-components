@@ -1,5 +1,5 @@
 (function() {
-  const template = document.createElement('template');
+  const template = document.createElement("template");
   template.innerHTML = `
     <header class="header">
       <h1>todos</h1>
@@ -21,14 +21,22 @@
   `;
 
   class TodoDemo extends HTMLElement {
-
     constructor() {
       super();
-
+      this._onNewTodoKeyup = this._onNewTodoKeyup.bind(this);
+      this._onTodoListChange = this._onTodoListChange.bind(this);
       // Bind the _onNewTodoKeyup and _onTodoListChange to current context
     }
 
     connectedCallback() {
+      this.innerHTML = this.shadowRoot.appendChild(
+        template.content.cloneNode(true)
+      );
+      this._newTodoInput.addEventListener("keyup", this._onNewTodoKeyup);
+      this.todoList.removeEventListener(
+        "todolist-change",
+        this._onTodoListChange
+      );
       // Append the template to the host, variable reference declarations and add event listeners.
     }
 
@@ -41,29 +49,28 @@
 
       if (event.keyCode === 13 && target.value) {
         this._addTodoItem(target.value);
-        target.value = '';
+        target.value = "";
       }
     }
 
     _onTodoListChange(event) {
       const count = event.detail.todoItemElementCount;
       if (count) {
-        this._mainSection.classList.remove('hidden');
+        this._mainSection.classList.remove("hidden");
       } else {
-        this._mainSection.classList.add('hidden');
+        this._mainSection.classList.add("hidden");
       }
 
       this._todoCount.textContent = count;
     }
 
     _addTodoItem(label) {
-      const item = document.createElement('todo-item');
+      const item = document.createElement("todo-item");
       item.label = label;
 
       this._todoList.appendChild(item);
     }
-
   }
-
+  window.customElements.define("todo-demo", TodoDemo);
   // Define the new custom element as todo-demo
 })();
